@@ -3,27 +3,32 @@ import { computed } from 'vue';
 
 const model = defineModel({ default: '' });
 
-const count = computed(() => {
-  const lines = [];
+const gitLogs = computed(() => {
   if (!model.value) {
-    return 0;
+    return [];
   }
-  model.value.split('\n').forEach((line) => {
+  return model.value.split('\n').map((line) => {
     const [email, ...name] = line.split(' ');
-    if (!lines.some((l) => l.email === email || l.name === name.join(' '))) {
-      lines.push({ email, name: name.join(' ') });
+    return { email, name: name.join(' ') };
+  });
+});
+
+const uniqueAuthors = computed(() => {
+  const lines = [];
+  gitLogs.value.forEach((line) => {
+    if (!lines.some((l) => l.email === line.email || l.name === line.name)) {
+      lines.push(line);
     }
   });
 
-  return lines.length;
+  return lines.map((line) => `${line.email} ${line.name}`).sort();
+});
+
+const count = computed(() => {
+  return uniqueAuthors.value.length;
 });
 const totalCount = computed(() => {
-  const lines = [];
-  if (!model.value) {
-    return 0;
-  }
-
-  return model.value.split('\n').length;
+  return gitLogs.value.length;
 });
 </script>
 
@@ -74,6 +79,10 @@ const totalCount = computed(() => {
         <textarea v-model="model" class="rounded" debounce="500" placeholder="Paste the output of the above command here" rows="10" required>
         </textarea>
         <p>Contributor count: {{ count }} / {{ totalCount }}</p>
+        <details >
+          <summary>Review for uniqueness > </summary>
+          <pre>{{uniqueAuthors}}</pre>
+        </details>
         </form>
       </div>
 
