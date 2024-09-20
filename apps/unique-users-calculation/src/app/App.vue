@@ -3,5 +3,5 @@ import NxWelcome from './NxWelcome.vue';
 </script>
 
 <template>
-  <NxWelcome title="unique-users-calculation" />
+  <NxWelcome />
 </template>
